@@ -1,0 +1,3 @@
+# Root requirements — Vercel serverless only (api/*.py)
+# Lightweight: no torch, no pocket-tts here
+# Heavy TTS deps → tts-server/requirements.txt

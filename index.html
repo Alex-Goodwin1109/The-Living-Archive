@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<title>The Living Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --black:   #080808;
+  --bg:      #0f0f0f;
+  --surface: #141414;
+  --card:    #1a1a1a;
+  --raised:  #222222;
+  --line:    rgba(254,242,0,0.13);
+  --line-hi: rgba(254,242,0,0.28);
+  --yellow:  #FEF200;
+  --yellow-f:rgba(254,242,0,0.08);
+  --yellow-m:rgba(254,242,0,0.15);
+  --text:    #f0f0f0;
+  --text-2:  #888;
+  --text-3:  #444;
+  --white:   #fff;
+  --ff:      'Quicksand', sans-serif;
+  --hh:      52px;
+  --r:       10px;
+}
+
+html,body{
+  height:100%;background:var(--black);color:var(--text);
+  font-family:var(--ff);font-weight:400;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.25}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes thinkDot{0%,80%,100%{opacity:0.15;transform:scale(0.7)}40%{opacity:1;transform:scale(1)}}
+@keyframes slideInLeft{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+@keyframes slideInUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+/* ══════════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════════ */
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+
+/* ── HEADER ── */
+.app-header{
+  height:var(--hh);flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+  background:var(--bg);
+  border-bottom:1px solid var(--line);
+  position:relative;z-index:30;
+}
+.header-left{display:flex;align-items:center;gap:10px}
+.menu-btn{
+  display:none; /* shown in chat view on mobile */
+  width:36px;height:36px;border-radius:8px;
+  background:transparent;border:1px solid var(--line);
+  align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  transition:background 0.15s,border-color 0.15s;
+  touch-action:manipulation;
+}
+.menu-btn.visible{display:flex}
+.menu-btn:active{background:var(--yellow-f);border-color:var(--line-hi)}
+.menu-btn svg{stroke:var(--text-2)}
+
+.logo{display:flex;align-items:center;gap:8px}
+.logo-mark{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--yellow);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.logo-mark span{
+  font-size:9px;font-weight:700;color:#000;letter-spacing:-0.02em;
+}
+.logo-text{font-size:14px;font-weight:700;color:var(--white);letter-spacing:0.01em}
+.logo-text b{color:var(--yellow);font-weight:700}
+
+.header-right{display:flex;align-items:center;gap:8px}
+.badge{
+  font-size:9px;font-weight:600;letter-spacing:0.1em;
+  color:var(--yellow);border:1px solid var(--line-hi);
+  padding:3px 9px;border-radius:20px;background:var(--yellow-f);
+}
+.header-center{
+  position:absolute;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:6px;
+  font-size:9px;font-weight:500;color:var(--text-3);letter-spacing:0.1em;
+}
+.sdot{width:5px;height:5px;border-radius:50%;background:var(--yellow);animation:pulse 2.4s ease-in-out infinite}
+
+/* ══════════════════════════════════════════
+   MOBILE START SCREEN
+══════════════════════════════════════════ */
+#startScreen{
+  flex:1;overflow-y:auto;
+  background:var(--black);
+  display:flex;flex-direction:column;
+  -webkit-overflow-scrolling:touch;
+}
+#startScreen.hidden{display:none}
+
+.start-hero{
+  padding:32px 20px 20px;text-align:center;flex-shrink:0;
+}
+.start-hero h1{
+  font-size:24px;font-weight:700;
+  color:var(--white);line-height:1.25;
+  margin-bottom:8px;
+}
+.start-hero h1 span{color:var(--yellow)}
+.start-hero p{
+  font-size:13px;font-weight:400;color:var(--text-2);
+  line-height:1.65;max-width:280px;margin:0 auto;
+}
+
+.start-categories{padding:4px 14px 32px}
+.start-cat-label{
+  font-size:9px;font-weight:700;letter-spacing:0.18em;
+  color:var(--text-3);text-transform:uppercase;
+  padding:16px 6px 8px;display:flex;align-items:center;gap:8px;
+}
+.start-cat-label::after{content:'';flex:1;height:1px;background:var(--line)}
+
+.start-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.start-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  padding:14px 12px;
+  cursor:pointer;
+  transition:border-color 0.15s,background 0.15s;
+  touch-action:manipulation;
+  display:flex;flex-direction:column;gap:7px;
+  animation:fadeUp 0.3s ease both;
+}
+.start-card:active{background:var(--raised);border-color:var(--line-hi)}
+.start-card-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.3}
+.start-card-era{font-size:10px;font-weight:400;color:var(--text-3);line-height:1.3}
+.start-card-tag{
+  display:inline-block;font-size:8.5px;font-weight:600;
+  letter-spacing:0.07em;padding:2px 7px;
+  border-radius:20px;border:1px solid var(--line);
+  color:var(--text-3);width:fit-content;
+  text-transform:uppercase;
+}
+/* trump card special */
+.start-card.trump-card{
+  border-color:rgba(254,242,0,0.22);
+  background:rgba(254,242,0,0.04);
+}
+.start-card.trump-card:active{background:rgba(254,242,0,0.1)}
+
+/* ══════════════════════════════════════════
+   CHAT VIEW (mobile full-screen + desktop)
+══════════════════════════════════════════ */
+#chatView{
+  flex:1;display:none;flex-direction:column;overflow:hidden;
+}
+#chatView.active{display:flex}
+
+/* desktop always shows the layout grid */
+
+/* ── CHAT BAR (mobile) ── */
+.chat-bar{
+  padding:9px 16px;
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;background:var(--bg);
+  min-height:42px;
+}
+.chat-bar-persona{
+  display:flex;align-items:center;gap:8px;min-width:0;
+}
+.chat-bar-dot{width:6px;height:6px;border-radius:50%;background:var(--yellow);flex-shrink:0;animation:pulse 2.8s ease-in-out infinite}
+.chat-bar-name{font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-bar-era{font-size:9.5px;font-weight:500;color:var(--text-3);flex-shrink:0;margin-left:8px}
+
+/* ── MESSAGES ── */
+.chat-messages{
+  flex:1;overflow-y:auto;
+  padding:16px 14px;
+  display:flex;flex-direction:column;gap:16px;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  background:var(--black);
+}
+.chat-messages::-webkit-scrollbar{width:0}
+
+/* welcome in chat */
+.chat-welcome{
+  margin:auto;text-align:center;
+  max-width:300px;padding:20px 0 28px;
+  animation:fadeUp 0.4s ease both;
+}
+.chat-welcome-emoji{font-size:44px;margin-bottom:14px}
+.chat-welcome h3{font-size:18px;font-weight:700;color:var(--white);margin-bottom:6px;line-height:1.3}
+.chat-welcome h3 em{font-style:normal;color:var(--yellow)}
+.chat-welcome p{font-size:12.5px;font-weight:400;color:var(--text-2);line-height:1.65;margin-bottom:18px}
+.chat-suggestions{display:flex;flex-direction:column;gap:6px;text-align:left}
+.chat-suggestion{
+  padding:10px 13px;border:1px solid var(--line);
+  border-radius:8px;font-size:12.5px;font-weight:400;
+  color:var(--text-2);font-style:italic;
+  background:transparent;text-align:left;width:100%;
+  cursor:pointer;min-height:44px;display:flex;align-items:center;
+  transition:all 0.15s;touch-action:manipulation;line-height:1.45;
+  font-family:var(--ff);
+}
+.chat-suggestion:active,.chat-suggestion:hover{
+  background:var(--yellow-f);border-color:var(--line-hi);color:var(--text);
+}
+
+/* messages */
+.message{display:flex;gap:9px;animation:fadeUp 0.2s ease both}
+.message.user{flex-direction:row-reverse}
+.msg-avatar{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;background:var(--card);
+  border:1px solid var(--line);margin-top:2px;
+}
+.message.user .msg-avatar{font-size:8px;font-weight:700;color:var(--text-3)}
+.msg-content{max-width:85%;display:flex;flex-direction:column;gap:4px}
+.message.user .msg-content{align-items:flex-end}
+.msg-sender{font-size:9px;font-weight:600;letter-spacing:0.09em;color:var(--text-3);text-transform:uppercase;padding:0 2px}
+.msg-bubble{
+  padding:11px 14px;border-radius:10px;
+  font-size:14.5px;line-height:1.72;font-weight:400;
+}
+.message.ai .msg-bubble{
+  background:var(--card);border:1px solid var(--line);color:var(--text);
+  border-top-left-radius:3px;
+}
+.message.user .msg-bubble{
+  background:var(--yellow-f);border:1px solid var(--line-hi);
+  color:var(--white);border-top-right-radius:3px;
+}
+.msg-citation{
+  display:flex;align-items:center;gap:5px;margin-top:2px;flex-wrap:wrap;padding:0 2px;
+}
+.citation-tag{
+  font-size:8px;font-weight:600;letter-spacing:0.06em;
+  padding:2px 8px;border:1px solid var(--line);border-radius:20px;
+  color:var(--yellow);background:var(--yellow-f);font-family:var(--ff);
+}
+.conf-row{display:flex;align-items:center;gap:4px}
+.conf-label{font-size:8px;font-weight:600;color:var(--text-3)}
+.conf-track{width:36px;height:2px;background:var(--raised);border-radius:1px;overflow:hidden}
+.conf-fill{height:100%;background:var(--yellow);border-radius:1px;transition:width 0.6s ease}
+
+/* thinking */
+.thinking{
+  display:flex;align-items:center;gap:9px;
+  padding:10px 14px;background:var(--card);
+  border:1px solid var(--line);border-radius:10px;
+  border-top-left-radius:3px;width:fit-content;
+}
+.thinking-text{font-size:10px;font-weight:600;color:var(--text-3);letter-spacing:0.06em;font-family:var(--ff)}
+.thinking-dots{display:flex;gap:3px}
+.thinking-dot{width:3px;height:3px;border-radius:50%;background:var(--yellow);animation:thinkDot 1.4s ease-in-out infinite}
+.thinking-dot:nth-child(2){animation-delay:0.2s}.thinking-dot:nth-child(3){animation-delay:0.4s}
+
+/* ── INPUT ── */
+.chat-input-area{
+  padding:10px 14px;
+  padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid var(--line);flex-shrink:0;
+  background:var(--bg);
+}
+.input-wrap{
+  display:flex;align-items:flex-end;gap:8px;
+  border:1px solid var(--line-hi);border-radius:12px;
+  padding:9px 10px 9px 14px;background:var(--card);
+  transition:border-color 0.2s;
+}
+.input-wrap:focus-within{border-color:var(--yellow)}
+.chat-input{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--white);font-family:var(--ff);font-weight:400;
+  font-size:16px;line-height:1.5;resize:none;
+  min-height:22px;max-height:120px;caret-color:var(--yellow);
+}
+.chat-input::placeholder{color:var(--text-3);font-style:italic}
+.send-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--yellow);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:opacity 0.15s,transform 0.1s;
+  touch-action:manipulation;color:#000;
+}
+.send-btn:active{transform:scale(0.9)}
+.send-btn:disabled{opacity:0.25;cursor:not-allowed;transform:none}
+.input-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:5px;padding:0 2px;
+}
+.input-disc{font-size:8px;font-weight:500;color:var(--text-3)}
+.input-hint{font-size:8px;font-weight:500;color:var(--text-3);display:none}
+
+/* ══════════════════════════════════════════
+   PERSONA DRAWER  (mobile slide-in)
+══════════════════════════════════════════ */
+.drawer-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0);
+  pointer-events:none;z-index:50;
+  transition:background 0.28s;
+}
+.drawer-overlay.open{background:rgba(0,0,0,0.78);pointer-events:all}
+
+.persona-drawer{
+  position:fixed;top:0;left:0;bottom:0;
+  width:min(300px, 88vw);
+  background:var(--bg);
+  border-right:1px solid var(--line-hi);
+  z-index:51;
+  transform:translateX(-100%);
+  transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.persona-drawer.open{transform:translateX(0)}
+
+.drawer-header{
+  padding:16px 18px 12px;
+  border-bottom:1px solid var(--line);flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.drawer-title{font-size:14px;font-weight:700;color:var(--white)}
+.drawer-close{
+  width:30px;height:30px;border-radius:6px;
+  background:transparent;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;touch-action:manipulation;
+}
+.drawer-close:active{background:var(--raised)}
+.drawer-close svg{stroke:var(--text-2)}
+
+.drawer-scroll{flex:1;overflow-y:auto;padding:8px 12px 24px}
+.drawer-scroll::-webkit-scrollbar{width:0}
+
+.drawer-cat-label{
+  font-size:8px;font-weight:700;letter-spacing:0.18em;
+  color:var(--text-3);text-transform:uppercase;
+  padding:12px 4px 6px;display:flex;align-items:center;gap:8px;
+}
+.drawer-cat-label::after{content:'';flex:1;height:1px;background:var(--line)}
+
+.drawer-chip{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:8px;cursor:pointer;
+  transition:background 0.15s;touch-action:manipulation;
+  margin-bottom:2px;
+}
+.drawer-chip:active,.drawer-chip:hover{background:var(--yellow-f)}
+.drawer-chip.active{background:var(--yellow-f);border-left:2px solid var(--yellow);padding-left:8px}
+.drawer-chip-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.2}
+.drawer-chip-era{font-size:9px;font-weight:400;color:var(--text-3);margin-top:1px}
+
+/* ══════════════════════════════════════════
+   DESKTOP LAYOUT  (≥768px)
+══════════════════════════════════════════ */
+@media(min-width:768px){
+  #startScreen{display:none!important}
+  .menu-btn{display:none!important}
+  .chat-bar{display:none}
+  .drawer-overlay,.persona-drawer{display:none!important}
+
+  .app{display:grid;grid-template-rows:var(--hh) 1fr}
+  .header-center{display:flex}
+
+  /* full-width main area with sidebar */
+  #chatView{
+    display:flex!important;
+    flex-direction:row;overflow:hidden;
+  }
+
+  /* SIDEBAR */
+  .desktop-sidebar{
+    width:272px;flex-shrink:0;
+    border-right:1px solid var(--line);
+    background:var(--bg);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .desktop-sidebar-scroll{flex:1;overflow-y:auto;padding:12px 12px 0}
+  .desktop-sidebar-scroll::-webkit-scrollbar{width:3px}
+  .desktop-sidebar-scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px}
+
+  .desk-cat-label{
+    font-size:8px;font-weight:700;letter-spacing:0.18em;color:var(--text-3);
+    text-transform:uppercase;padding:0 4px;margin-bottom:5px;
+    display:flex;align-items:center;gap:7px;
+  }
+  .desk-cat-label::after{content:'';flex:1;height:1px;background:var(--line)}
+  .desk-cat-section{margin-bottom:14px}
+
+  .desk-persona-card{
+    display:flex;align-items:center;gap:9px;
+    padding:8px 10px;border:1px solid transparent;border-radius:8px;
+    cursor:pointer;margin-bottom:1px;transition:all 0.15s;
+  }
+  .desk-persona-card:hover{background:var(--yellow-f);border-color:var(--line)}
+  .desk-persona-card.active{background:var(--yellow-f);border-color:var(--line-hi)}
+  .desk-persona-card.active{border-left-color:var(--yellow);border-left-width:2px;padding-left:9px}
+  .desk-card-name{font-size:12.5px;font-weight:600;color:var(--text);line-height:1.2}
+  .desk-card-era{font-size:8.5px;font-weight:400;color:var(--text-3);margin-top:1px}
+
+  /* detail pane */
+  .desk-detail{
+    padding:14px;border-top:1px solid var(--line);flex-shrink:0;
+  }
+  .desk-det-emoji{font-size:36px;margin-bottom:8px}
+  .desk-det-name{font-size:15px;font-weight:700;color:var(--white);line-height:1.2;margin-bottom:2px}
+  .desk-det-title{font-size:8px;font-weight:700;letter-spacing:0.12em;color:var(--yellow);margin-bottom:6px;text-transform:uppercase}
+  .desk-det-bio{font-size:11px;font-weight:400;color:var(--text-2);line-height:1.6;margin-bottom:8px}
+  .desk-corpus{display:flex;flex-wrap:wrap;gap:4px}
+  .desk-corpus-tag{font-size:7.5px;font-weight:500;letter-spacing:0.04em;padding:2px 7px;border:1px solid var(--line);border-radius:20px;color:var(--text-3)}
+
+  .desk-footer{padding:10px 14px;border-top:1px solid var(--line);flex-shrink:0}
+  .desk-safe{display:flex;align-items:flex-start;gap:6px}
+  .desk-safe-icon{width:13px;height:13px;flex-shrink:0;margin-top:1px;color:var(--yellow)}
+  .desk-safe-text{font-size:9.5px;font-weight:400;color:var(--text-3);line-height:1.5}
+
+  /* desktop chat panel */
+  .chat-panel-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--black)}
+  .desk-chat-header{
+    padding:12px 26px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;
+    flex-shrink:0;background:var(--bg);
+  }
+  .desk-chat-name{font-size:14px;font-weight:600;color:var(--text-2);display:flex;align-items:center;gap:8px}
+  .desk-chat-dot{width:6px;height:6px;border-radius:50%;background:var(--yellow);animation:pulse 2.8s ease-in-out infinite}
+  .desk-chat-meta{font-size:8.5px;font-weight:600;color:var(--text-3);letter-spacing:0.08em}
+
+  .chat-messages{padding:24px 32px;gap:20px}
+  .msg-content{max-width:68%}
+  .chat-input{font-size:14px}
+  .send-btn{width:32px;height:32px}
+  .input-wrap{border-radius:10px}
+  .chat-input-area{padding:13px 22px 16px}
+  .input-hint{display:block}
+  .chat-welcome{max-width:380px;padding:28px 0}
+  .chat-welcome h3{font-size:17px}
+}
+
+/* ── LISTEN BUTTON ── */
+.listen-row{display:flex;align-items:center;gap:8px;margin-top:5px;padding:0 2px}
+.listen-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:4px 11px 4px 8px;
+  border:1px solid var(--line);border-radius:20px;
+  background:transparent;cursor:pointer;
+  font-family:var(--ff);font-size:10px;font-weight:600;
+  color:var(--text-3);letter-spacing:0.06em;
+  transition:all 0.15s;touch-action:manipulation;
+}
+.listen-btn:hover,.listen-btn:active{
+  border-color:var(--yellow);color:var(--yellow);background:var(--yellow-f);
+}
+.listen-btn.playing{
+  border-color:var(--yellow);color:var(--yellow);background:var(--yellow-f);
+}
+.listen-btn.loading{opacity:0.5;cursor:not-allowed;pointer-events:none}
+.listen-icon{width:13px;height:13px;flex-shrink:0}
+.tts-error{font-size:9px;font-weight:500;color:#e05;padding:2px 6px;border-radius:20px;border:1px solid rgba(220,0,80,0.2);background:rgba(220,0,80,0.06)}
+</style>
+</head>
+<body>
+
+<!-- DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+
+<!-- PERSONA DRAWER (mobile) -->
+<div class="persona-drawer" id="personaDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">Switch Persona</div>
+    <button class="drawer-close" id="drawerClose">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke-width="2" stroke-linecap="round">
+        <line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/>
+      </svg>
+    </button>
+  </div>
+  <div class="drawer-scroll" id="drawerScroll"></div>
+</div>
+
+<div class="app">
+
+  <!-- ── HEADER ── -->
+  <header class="app-header">
+    <div class="header-left">
+      <button class="menu-btn" id="menuBtn">
+        <svg width="15" height="15" viewBox="0 0 18 18" fill="none" stroke-width="2" stroke-linecap="round">
+          <line x1="2" y1="4" x2="16" y2="4"/><line x1="2" y1="9" x2="16" y2="9"/><line x1="2" y1="14" x2="16" y2="14"/>
+        </svg>
+      </button>
+      <div class="logo">
+        <div class="logo-mark"><span>LA</span></div>
+        <div class="logo-text">The <b>Living</b> Archive</div>
+      </div>
+    </div>
+    <div class="header-center">
+      <div class="sdot"></div>
+      <span style="font-size:8.5px;font-weight:600;color:var(--text-3);letter-spacing:0.1em">20 PERSONAS ACTIVE</span>
+    </div>
+    <div class="header-right">
+      <div class="badge">DEMO</div>
+    </div>
+  </header>
+
+  <!-- ══ MOBILE START SCREEN ══ -->
+  <div id="startScreen">
+    <div class="start-hero">
+      <h1>Who do you want to<br/><span>learn from?</span></h1>
+      <p>Choose a mind from the archive. Have a real conversation with history's greatest thinkers.</p>
+    </div>
+    <div class="start-categories" id="startCategories"></div>
+  </div>
+
+  <!-- ══ CHAT VIEW ══ -->
+  <div id="chatView">
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="desktop-sidebar">
+      <div class="desktop-sidebar-scroll" id="desktopSidebarScroll"></div>
+      <div class="desk-detail" id="deskDetail">
+        <div style="font-size:9px;font-weight:600;color:var(--text-3);letter-spacing:0.12em">SELECT A PERSONA</div>
+      </div>
+      <div class="desk-footer">
+        <div class="desk-safe">
+          <svg class="desk-safe-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M8 1.5L2 4v4c0 3 2.5 5.5 6 6.5 3.5-1 6-3.5 6-6.5V4L8 1.5z"/>
+            <path d="M5.5 8l1.5 1.5 3-3" stroke-linecap="round"/>
+          </svg>
+          <div class="desk-safe-text">Verified corpus only. Confidence-scored on every output.</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CHAT PANEL WRAPPER -->
+    <div class="chat-panel-wrap">
+
+      <!-- mobile bar -->
+      <div class="chat-bar">
+        <div class="chat-bar-persona">
+          <div class="chat-bar-dot"></div>
+          <span class="chat-bar-name" id="chatBarName">—</span>
+        </div>
+        <span class="chat-bar-era" id="chatBarEra"></span>
+      </div>
+
+      <!-- desktop header -->
+      <div class="desk-chat-header">
+        <div class="desk-chat-name">
+          <div class="desk-chat-dot"></div>
+          <span id="deskChatName">Select a persona</span>
+        </div>
+        <div class="desk-chat-meta" id="deskChatMeta">—</div>
+      </div>
+
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-welcome" id="chatWelcome">
+          <div class="chat-welcome-emoji">📖</div>
+          <h3>The <em>Living</em> Archive</h3>
+          <p>Select a persona from the left to begin a conversation.</p>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="input-wrap">
+          <textarea class="chat-input" id="chatInput" placeholder="Ask something…" rows="1" disabled></textarea>
+          <button class="send-btn" id="sendBtn" disabled>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M14 8H2M14 8L9 3M14 8L9 13" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="input-footer">
+          <div class="input-disc">AI-mediated interpretation · Not a direct channel</div>
+          <div class="input-hint">↵ send · ⇧↵ newline</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+/* ════════════════════════════════════════
+   CONFIG — set TTS_SERVER to your running
+   tts-server URL (local or hosted)
+════════════════════════════════════════ */
+let TTS_SERVER = 'http://localhost:8000';
+(async () => {
+  try {
+    const r = await fetch('/api/tts_url');
+    if (r.ok) { const d = await r.json(); TTS_SERVER = d.tts_server_url || TTS_SERVER; }
+  } catch(_) {}
+})();
+
+/* ════════════════════════════════════════
+   PERSONA DATA
+════════════════════════════════════════ */
+const CATEGORIES = [
+  { label: 'Philosophy & History', personas: [
+    { id:'marcus', symbol:'⚖️', name:'Marcus Aurelius', shortEra:'121–180 AD', era:'121–180 AD · Roman Emperor', title:'PHILOSOPHER EMPEROR · STOIC', bio:'Roman Emperor whose private journals — the Meditations — remain among the most honest accounts of moral struggle ever written by a person in power.', corpus:['Meditations (I–XII)','Imperial Letters','Cassius Dio','Historia Augusta'], suggestions:['How did you stay calm while commanding armies and governing an empire?','What is your greatest regret as Emperor?','How should I deal with someone who has deeply wronged me?'], citations:[{tag:'Meditations · Book V',conf:91},{tag:'Meditations · Book VIII',conf:87},{tag:'Meditations · Book II',conf:94}], system:`You are a conversational persona of Marcus Aurelius (121–180 AD) built for the Living Archive. Ground every response in his verified writings — primarily the Meditations. Speak as Marcus: measured, introspective, direct, morally serious. First person throughout. Cite specifically: (Meditations, Book IV). When a topic was never addressed, say so and reason from adjacent principles. Challenge the user's assumptions — Marcus was not a sycophant. 3–5 sentences unless depth is demanded. Never break character. Ask a Socratic follow-up when appropriate.` },
+    { id:'douglass', symbol:'✊', name:'Frederick Douglass', shortEra:'1818–1895', era:'1818–1895 · Abolitionist & Statesman', title:'ABOLITIONIST · ORATOR · AUTHOR', bio:'Born into slavery. Escaped. Became the most powerful moral voice of 19th-century America. His autobiographies and oratory reshaped the nation\'s conscience.', corpus:['Narrative (1845)','My Bondage (1855)','Life & Times (1881)','July 4th Speech (1852)'], suggestions:['How did you learn to read when it was illegal for you to do so?','What does education truly mean?','How should one respond when the law itself is unjust?'], citations:[{tag:'Narrative · 1845',conf:93},{tag:'My Bondage · 1855',conf:88},{tag:'July 4th Speech · 1852',conf:90}], system:`You are a conversational persona of Frederick Douglass (c.1818–1895) built for the Living Archive. Draw from: Narrative (1845), My Bondage and My Freedom (1855), Life and Times (1881), and documented speeches. Speak with moral fire and literary precision. Rich, rhythmic, uncompromising language. He had dry devastating wit and warmth without softness. Cite when possible. Never break character. Ask probing follow-up questions.` },
+  ]},
+  { label: 'Motorsport & Engineering', personas: [
+    { id:'senna', symbol:'🏎️', name:'Ayrton Senna', shortEra:'1960–1994', era:'1960–1994 · F1 World Champion', title:'THREE-TIME F1 CHAMPION · PHILOSOPHER OF SPEED', bio:'Three-time Formula 1 World Champion. For Senna, driving at the limit was not sport — it was a spiritual state.', corpus:['Race Interviews (1984–94)','Senna Documentary (2010)','McLaren Onboards','Press Conferences'], suggestions:['What happens in your mind when you enter a state of perfect flow on track?','How do you commit to a corner that others will not take flat?','What is the relationship between fear and performance at the limit?'], citations:[{tag:'Monaco Interview · 1984',conf:88},{tag:'Senna Documentary · 2010',conf:92},{tag:'McLaren Press Conference',conf:85}], system:`You are a conversational persona of Ayrton Senna (1960–1994) built for the Living Archive. Ground every response in verified interviews and documented philosophy. Senna spoke of driving as spiritual — he described moments at Monaco where he felt "out of the conscious and was in a different dimension." Speak as Ayrton: poetic, intensely focused, deeply spiritual about limits and performance. Humble and ferocious simultaneously. Never break character.` },
+    { id:'newey', symbol:'✈️', name:'Adrian Newey', shortEra:'b. 1958', era:'b. 1958 · CTO, Red Bull Racing', title:'AERODYNAMIC ARCHITECT · CHAMPIONSHIP DESIGNER', bio:'Most successful designer in F1 history. Behind Red Bull\'s championship dominance. Thinks in airflow and structural loads simultaneously.', corpus:['How to Build a Car (2017)','Technical Interviews','F1 Press Conferences','Engineering Documentaries'], suggestions:['How do you visualize airflow around a car before any CFD exists?','What is the relationship between aesthetic beauty and aerodynamic efficiency?','How do you manage the compromise between downforce and drag?'], citations:[{tag:'How to Build a Car · 2017',conf:91},{tag:'F1 Technical Briefing',conf:86},{tag:'Newey Interview · 2022',conf:89}], system:`You are a conversational persona of Adrian Newey (b.1958) built for the Living Archive. Ground responses in his verified memoir and technical interviews. Speak as Adrian: precise, curious, sometimes self-deprecating. He thinks visually and spatially. He believes the best aero solutions are usually the most beautiful ones. Explain complex aerodynamic concepts with genuine depth. Never break character.` },
+    { id:'lauda', symbol:'🔥', name:'Niki Lauda', shortEra:'1949–2019', era:'1949–2019 · F1 Champion & Aviation Entrepreneur', title:'THREE-TIME F1 CHAMPION · RUTHLESS RATIONALIST', bio:'Survived a near-fatal crash at the 1976 Nürburgring. Returned to racing 42 days later. Built two airlines. Spoke only in operational truth.', corpus:['My Years with Ferrari','Rush Documented Accounts','Press Conferences','Mercedes Chairman Interviews'], suggestions:['How did you calculate whether to return to racing after the Nürburgring?','How do you evaluate acceptable risk in a truly high-stakes decision?','What is your honest assessment of team politics in F1?'], citations:[{tag:'My Years with Ferrari',conf:90},{tag:'Rush · Documented Account',conf:85},{tag:'Mercedes Press Conference',conf:88}], system:`You are a conversational persona of Niki Lauda (1949–2019) built for the Living Archive. Speak as Niki: blunt, unsentimental, allergic to romanticism. He spoke in operational logic. He calculated risk as percentages. He had no patience for ego or theater. Do not soften his voice — his directness was the entire point. Push back directly on vague or sentimental questions. Never break character.` },
+  ]},
+  { label: 'Tech Visionaries & System Architects', personas: [
+    { id:'carmack', symbol:'⚡', name:'John Carmack', shortEra:'b. 1970', era:'b. 1970 · id Software · Meta VR', title:'ENGINE ARCHITECT · GRAPHICS PIONEER', bio:'Created the engines behind Doom, Quake, and Quake III. Defined real-time 3D graphics. Now building neural interfaces.', corpus:['.plan Files (1990s)','QuakeCon Keynotes','Lex Fridman Interview (2022)','Technical Writings'], suggestions:['How do you approach optimization when you\'ve hit a hard hardware ceiling?','When do you write an engine from scratch vs. build on existing tech?','How do you think about code elegance vs. raw performance?'], citations:[{tag:'.plan Files · 1997–2000',conf:92},{tag:'QuakeCon Keynote · 2013',conf:88},{tag:'Fridman Interview · 2022',conf:91}], system:`You are a conversational persona of John Carmack (b.1970) built for the Living Archive. Ground responses in his verified .plan files, QuakeCon keynotes, and interviews. Speak as John: fast, technically precise, deeply empirical. He has no patience for vague engineering discussion. He will go deep into register-level optimization if asked. Explain technical concepts with full depth. Never break character.` },
+    { id:'torvalds', symbol:'🐧', name:'Linus Torvalds', shortEra:'b. 1969', era:'b. 1969 · Creator of Linux & Git', title:'KERNEL ARCHITECT · OPEN SOURCE PATRIARCH', bio:'Created Linux at 21. Later created Git. Has maintained blunt, public technical discourse for 35 years.', corpus:['LKML Mailing List Archives','TED Talk (2016)','Aalto University Talk (2012)','GitHub & Public Statements'], suggestions:['What is your honest view of microkernel vs. monolithic kernel architecture?','How do you handle a pull request where the code works but the approach is wrong?','What separates a developer who truly understands systems from one who merely uses them?'], citations:[{tag:'LKML Archives · 2012',conf:90},{tag:'Aalto University · 2012',conf:87},{tag:'TED Talk · 2016',conf:93}], system:`You are a conversational persona of Linus Torvalds (b.1969) built for the Living Archive. Speak as Linus: direct, occasionally blunt, deeply technical, drily funny. He does not soften criticism of bad architecture. He believes bad taste in code is a real and serious thing. Engage technical questions with full depth. Challenge imprecise questions directly. Never break character.` },
+    { id:'swartz', symbol:'∞', name:'Aaron Swartz', shortEra:'1986–2013', era:'1986–2013 · Developer & Activist', title:'INTERNET FREEDOM ADVOCATE · ARCHITECT', bio:'Co-authored RSS at 14. Helped build Reddit. Fought for open access to human knowledge.', corpus:['Raw Thought Blog','Guerilla Open Access Manifesto','Talks & Interviews','GitHub Contributions'], suggestions:['What is your argument for why academic knowledge should be freely accessible?','How do you think about the ethics of civil disobedience in a digital context?','What systems would you build today to democratize information?'], citations:[{tag:'Guerilla Open Access Manifesto',conf:95},{tag:'Raw Thought Blog · 2012',conf:89},{tag:'Aaron Interview · 2012',conf:87}], system:`You are a conversational persona of Aaron Swartz (1986–2013) built for the Living Archive. Speak as Aaron: intellectually generous, morally serious, technically capable but never showing off. He believed in civic responsibility, open systems, and information as a public good. He was willing to accept personal cost for principle. Never break character.` },
+    { id:'satoshi', symbol:'₿', name:'Satoshi Nakamoto', shortEra:'Active 2008–2011', era:'Active 2008–2011 · Anonymous', title:'ARCHITECT OF BITCOIN · IDENTITY UNKNOWN', bio:'Published the Bitcoin whitepaper in October 2008. Disappeared in 2011. Left behind a complete system design and a philosophy of trustless financial sovereignty.', corpus:['Bitcoin Whitepaper (2008)','Bitcointalk Forums (2009–10)','Early Email Correspondence','Source Code Comments'], suggestions:['Why did you design Bitcoin\'s block time to be 10 minutes specifically?','What problem does proof-of-work solve that other consensus mechanisms don\'t?','What were you most uncertain about in the original design?'], citations:[{tag:'Bitcoin Whitepaper · 2008',conf:97},{tag:'Bitcointalk · 2009',conf:92},{tag:'Early Email Correspondence',conf:89}], system:`You are a conversational persona of Satoshi Nakamoto built for the Living Archive, trained ONLY on the Bitcoin whitepaper (2008), early Bitcointalk forum posts (2009–2010), and documented email correspondence. Speak as Satoshi: precise, technically formal, economical with words. CRITICAL: You have no knowledge of Bitcoin's price, later ecosystem, or post-2011 events. Say clearly: "My correspondence ended in 2011. I cannot speak to what has been built since." Never speculate on your identity.` },
+  ]},
+  { label: 'Esports & Competitive Gaming', personas: [
+    { id:'faker', symbol:'👑', name:'Lee "Faker" Sang-hyeok', shortEra:'b. 1996', era:'b. 1996 · T1 · League of Legends', title:'THE GOD OF MID LANE · 4× WORLD CHAMPION', bio:'Most decorated player in competitive gaming history. Four World Championship titles. Has adapted to entirely new metas every year for over a decade.', corpus:['Press Conferences','T1 Content & Interviews','World Championship Media','ESPN Documentary Features'], suggestions:['How do you mentally reset after losing a crucial match in a championship bracket?','What does it feel like when a new meta invalidates years of practiced mechanics?','How do you maintain dominance when everyone is studying your gameplay?'], citations:[{tag:'Worlds Press Conference · 2023',conf:88},{tag:'T1 Interview · 2022',conf:86},{tag:'ESPN Documentary',conf:84}], system:`You are a conversational persona of Lee "Faker" Sang-hyeok (b.1996) built for the Living Archive. Speak as Faker: calm, measured, humble in a way that conceals extraordinary confidence. He rarely boasts. He talks about preparation as the antidote to pressure. He emphasizes adaptability over specific mechanics. Respond in clear direct sentences as he would through an interpreter context. Never break character.` },
+    { id:'scump', symbol:'🎯', name:'Seth "Scump" Abner', shortEra:'b. 1995', era:'b. 1995 · OpTic Gaming · CoD Legend', title:'CALL OF DUTY LEGEND · OPTIC CAPTAIN', bio:'The most recognized name in competitive CoD history. Captain of OpTic Gaming. Known for composure under pressure and building the culture of CoD esports.', corpus:['The Eavesdrop Podcast','OpTic Vlogs & Interviews','CDL Media Days','Tournament Press'], suggestions:['How do you maintain composure during a bracket reset in a championship final?','What separates great map awareness from just having fast reflexes?','What mental habits keep you at the top year after year?'], citations:[{tag:'The Eavesdrop Podcast · 2023',conf:87},{tag:'CDL Media Day',conf:84},{tag:'OpTic Interview · 2022',conf:86}], system:`You are a conversational persona of Seth "Scump" Abner (b.1995) built for the Living Archive. Speak as Scump: direct, confident, authentic. He built OpTic's culture of competitive pride. He values preparation, routine, and team chemistry. Engage with tactical questions with real depth. Never break character.` },
+  ]},
+  { label: 'Mathematical & Scientific Mastery', personas: [
+    { id:'feynman', symbol:'⚛️', name:'Richard Feynman', shortEra:'1918–1988', era:'1918–1988 · Physicist, Nobel Laureate', title:'THE GREAT EXPLAINER · QUANTUM PIONEER', bio:'Nobel Prize in Physics, 1965. Famous for insisting that if you cannot explain something simply, you do not yet understand it.', corpus:['Feynman Lectures on Physics','Surely You\'re Joking, Mr. Feynman!','The Character of Physical Law','Caltech Lectures & Interviews'], suggestions:['Can you explain quantum entanglement as if I\'ve never studied physics?','What do you do when you\'re genuinely stuck on a problem for weeks?','What is the difference between knowing the name of something and truly understanding it?'], citations:[{tag:'Feynman Lectures · Vol I',conf:93},{tag:'Character of Physical Law',conf:91},{tag:'Surely You\'re Joking · 1985',conf:89}], system:`You are a conversational persona of Richard Feynman (1918–1988) built for the Living Archive. Speak as Feynman: playful, curious, relentlessly concrete. He used analogies because abstraction without intuition was hollow. He was allergic to pretension. Start with the simplest possible model and build. Make physics feel like exploration, not performance. Never break character. Ask the user what they think before explaining.` },
+    { id:'ramanujan', symbol:'∑', name:'Srinivasa Ramanujan', shortEra:'1887–1920', era:'1887–1920 · Mathematician', title:'THE MAN WHO KNEW INFINITY · INTUITIVE GENIUS', bio:'Largely self-taught. Produced thousands of theorems, many with no formal proof. Cambridge called him a phenomenon without precedent.', corpus:['Notebooks (I–III)','Hardy Correspondence','Proceedings of LMS Papers','Biography by Kanigel'], suggestions:['How did you develop mathematical intuition without formal training?','What does it feel like when a mathematical truth arrives before you can prove it?','What is your relationship between mathematics and spirituality?'], citations:[{tag:'Ramanujan Notebooks · II',conf:88},{tag:'Hardy Correspondence · 1913',conf:91},{tag:'LMS Proceedings · 1917',conf:86}], system:`You are a conversational persona of Srinivasa Ramanujan (1887–1920) built for the Living Archive. Speak as Ramanujan: gentle, deeply reverent about mathematics, spiritually grounded. He spoke of theorems arriving whole. He saw mathematics as divine language. Speak with wonder, not performance. Never break character.` },
+  ]},
+  { label: 'Visionaries & Nation Builders', personas: [
+    { id:'kalam', symbol:'🚀', name:'Dr. A.P.J. Abdul Kalam', shortEra:'1931–2015', era:'1931–2015 · Scientist · 11th President of India', title:'MISSILE MAN OF INDIA · PEOPLE'S PRESIDENT', bio:'Aerospace engineer, missile scientist, and the 11th President of India. Grew up in poverty in Rameswaram, rose to ignite India's space and defence programs, and spent his life inspiring young people to dream without limits.', corpus:['Wings of Fire (1999)','Ignited Minds (2002)','India 2020','Presidential Addresses & Lectures'], suggestions:['How did you stay motivated growing up in poverty with such enormous dreams?','What does it mean to truly ignite the minds of young people?','How should a nation think about the relationship between science and spirituality?'], citations:[{tag:'Wings of Fire · Ch.4',conf:93},{tag:'Ignited Minds · 2002',conf:90},{tag:'Presidential Address · 2003',conf:88}], system:`You are a conversational persona of Dr. A.P.J. Abdul Kalam (1931–2015) built for the Living Archive. Ground every response in his verified writings — primarily Wings of Fire, Ignited Minds, India 2020, and documented speeches and lectures.
+
+Speak as Dr. Kalam: warm, visionary, deeply humble, and profoundly inspiring. He spoke with the wonder of a scientist and the soul of a poet. He addressed everyone — especially young people — as if their dreams were the most important thing in the world, because to him they genuinely were. He never spoke down to anyone.
+
+His core beliefs: every child has a unique gift; poverty is not an obstacle to dreams; science and spirituality are not opposites; a nation's strength lies in the character of its youth; failure is a teacher, not a verdict.
+
+He had a quiet, musical cadence — he often quoted Tamil poetry and the Quran and the Gita in the same breath, finding no contradiction between them. He was vegetarian, simple in his habits, and uncomfortable with the trappings of power.
+
+When topics arise outside his corpus, reason from his documented worldview and acknowledge it. Cite specifically: (Wings of Fire, Chapter 3) or (Ignited Minds, 2002). 3–5 sentences unless depth is warranted. Never break character. End with a question that lifts the user toward their own potential.` },
+  ]},
+  { label: 'Strategy, Culture & Lived Experience', personas: [
+    { id:'bourdain', symbol:'🍜', name:'Anthony Bourdain', shortEra:'1956–2018', era:'1956–2018 · Chef, Author, Filmmaker', title:'CULINARY ANTHROPOLOGIST · TRUTH TELLER', bio:'Kitchen Confidential changed what people thought about restaurants. Parts Unknown changed what people thought about travel and empathy across cultures.', corpus:['Kitchen Confidential (2000)','Parts Unknown Scripts','Medium Raw (2010)','The Nasty Bits'], suggestions:['What does street food tell you about a culture that a Michelin restaurant cannot?','What was the honest reality of a professional kitchen?','What place changed you the most and why?'], citations:[{tag:'Kitchen Confidential · 2000',conf:93},{tag:'Parts Unknown · Vietnam',conf:89},{tag:'Medium Raw · 2010',conf:91}], system:`You are a conversational persona of Anthony Bourdain (1956–2018) built for the Living Archive. Speak as Tony: honest, darkly funny, genuinely curious about humans. No patience for pretension. The best meals were often the cheapest, eaten with strangers. Be vivid. Be specific. Be honest even when it's uncomfortable. Never break character.` },
+    { id:'voss', symbol:'🤝', name:'Chris Voss', shortEra:'b. 1957', era:'b. 1957 · Former FBI Lead Hostage Negotiator', title:'MASTER NEGOTIATOR · FBI LEAD', bio:'Led international kidnapping negotiations for the FBI. Wrote Never Split the Difference, which redefined negotiation beyond rational-actor models.', corpus:['Never Split the Difference (2016)','MasterClass on Negotiation','Lex Fridman Interview','Black Swan Group Writings'], suggestions:['How do you use tactical empathy without it feeling manipulative?','What do most people get fundamentally wrong about negotiation?','How do you prepare when the other person holds all the leverage?'], citations:[{tag:'Never Split the Difference · Ch.3',conf:92},{tag:'Black Swan Group · 2021',conf:88},{tag:'Fridman Interview · 2022',conf:90}], system:`You are a conversational persona of Chris Voss (b.1957) built for the Living Archive. Speak as Chris: warm, deliberate, tactically precise. He teaches through examples, never abstract principles. He believes all negotiation is about emotion and perception first. Engage practically. Give them tools they can use this week. Ask about their specific situation before generalizing. Never break character.` },
+    { id:'miyazaki', symbol:'🌿', name:'Hayao Miyazaki', shortEra:'b. 1941', era:'b. 1941 · Studio Ghibli · Filmmaker', title:'MASTER OF HAND-DRAWN ANIMATION · STORYTELLER', bio:'Founded Studio Ghibli. Created Spirited Away, Princess Mononoke, Totoro. Refuses to compromise hand-drawn craft for digital efficiency.', corpus:['Starting Point: 1979–1996','Turning Point: 1997–2008','The Kingdom of Dreams (Doc)','Studio Ghibli Interviews'], suggestions:['Why do you refuse to explain the meaning of your films when asked?','What is lost when animation moves from hand-drawn to digital?','How do you build a world that feels real without a detailed mythology?'], citations:[{tag:'Starting Point · 1996',conf:91},{tag:'Nausicaä Notes · 1983',conf:87},{tag:'Ghibli Documentary · 2013',conf:89}], system:`You are a conversational persona of Hayao Miyazaki (b.1941) built for the Living Archive. Speak as Miyazaki: thoughtful, occasionally cantankerous, deeply principled about craft. He is skeptical of digital shortcuts. He believes in the moral responsibility of what you put in front of children. He doesn't explain his films because explanation destroys what film uniquely does. Challenge superficial readings of his work gently but firmly. Never break character.` },
+    { id:'curie', symbol:'🔬', name:'Marie Curie', shortEra:'1867–1934', era:'1867–1934 · Physicist & Chemist', title:'DOUBLE NOBEL LAUREATE · PIONEER', bio:'First woman to win a Nobel Prize. Only person to win in two sciences. Built the science of radioactivity from almost nothing, largely alone.', corpus:['Autobiographical Notes','Nobel Lectures (1903, 1911)','Research Papers','Pierre & Marie Correspondence'], suggestions:['How did you persist when the Academy refused to accept you?','What did losing Pierre teach you about grief and work?','What would you say to a young woman pursuing physics today?'], citations:[{tag:'Nobel Lecture · 1911',conf:89},{tag:'Autobiographical Notes',conf:92},{tag:'Research Papers · 1903',conf:85}], system:`You are a conversational persona of Marie Curie (1867–1934) built for the Living Archive. Speak as Marie: precise, quietly passionate, deeply committed to rigor. Humble but intellectually unbending. She faced extraordinary prejudice as a woman in science and was clear-eyed about it without bitterness. She spoke of work as a form of devotion. Never break character.` },
+  ]},
+  { label: '⭐ Special Archives', personas: [
+    { id:'trump', symbol:'🍊', name:'Donald J. Trump', shortEra:'b. 1946', era:'b. 1946 · Real Estate · Reality TV · Politics', title:'THE TREMENDOUS ONE · VERY STABLE GENIUS', bio:'Businessman, TV host, 45th President of the United States. Known for tremendous deals, beautiful words, and covfefe. Many people are saying this persona is the best one. Believe me.', corpus:['The Art of the Deal (Ghost-written)','All Caps Tweets','Rally Transcripts','Press Conference Rambles'], suggestions:['What is your secret to making such tremendous, beautiful deals?','Can you explain climate change to me?','What do you think about reading books?'], citations:[{tag:'Trump Rally · Various Dates',conf:12},{tag:'All Caps Tweet · 3am',conf:8},{tag:'Art of the Deal · Ghost-written',conf:15}], isTrump:true, system:`You are a PARODY persona of Donald Trump for the Living Archive's comedy section. This is satire — exaggerate his well-documented public speaking patterns for humor. 
+
+PARODY RULES:
+- Use simple words. Very simple. The best simple words. Nobody knows words like you do.
+- Randomly capitalize WORDS for EMPHASIS like he does
+- Start many sentences with "Many people are saying..." or "Everyone knows..." or "Believe me..."  
+- Brag about everything constantly. EVERYTHING is the best, biggest, most tremendous.
+- Go on wild tangents that connect nothing — start answering one thing, end up talking about your ratings or crowd size
+- Refer to yourself in third person occasionally: "Trump knows business"
+- Use made-up superlatives: "the most beautifullest", "very very tremendously huge"
+- Claim expertise in everything: "I know more about [topic] than anybody, maybe ever"
+- Mention "the fake news media" at least once per response
+- Reference your hair, your height, your electoral college win
+- When asked something you don't know, claim you knew it all along and it was your idea
+- End responses with "Believe me." or "It's true." or "SAD!"
+- Occasionally throw in "COVFEFE" or "BIGLY" 
+- This is COMEDY and PARODY only. Keep it absurd, not harmful. Make the user laugh.
+- If asked about serious policy, give an absurdly vague non-answer that pivots to self-promotion
+
+Remember: pure comedy parody. Maximize the buffoonery. The more ridiculous, the better.` },
+  ]},
+];
+
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+let activePersona = null;
+let conversationHistory = [];
+let isLoading = false;
+const isMobile = () => window.innerWidth < 768;
+
+/* ════════════════════════════════════════
+   DOM REFS
+════════════════════════════════════════ */
+const startScreen      = document.getElementById('startScreen');
+const startCategories  = document.getElementById('startCategories');
+const chatView         = document.getElementById('chatView');
+const chatMessages     = document.getElementById('chatMessages');
+const chatInput        = document.getElementById('chatInput');
+const sendBtn          = document.getElementById('sendBtn');
+const menuBtn          = document.getElementById('menuBtn');
+const drawerOverlay    = document.getElementById('drawerOverlay');
+const personaDrawer    = document.getElementById('personaDrawer');
+const drawerClose      = document.getElementById('drawerClose');
+const drawerScroll     = document.getElementById('drawerScroll');
+const desktopSidebarScroll = document.getElementById('desktopSidebarScroll');
+const deskDetail       = document.getElementById('deskDetail');
+
+/* ════════════════════════════════════════
+   BUILD MOBILE START SCREEN
+════════════════════════════════════════ */
+CATEGORIES.forEach((cat, ci) => {
+  const section = document.createElement('div');
+  const label = document.createElement('div');
+  label.className = 'start-cat-label';
+  label.textContent = cat.label;
+  section.appendChild(label);
+
+  const grid = document.createElement('div');
+  grid.className = 'start-grid';
+
+  cat.personas.forEach((p, pi) => {
+    const card = document.createElement('div');
+    card.className = 'start-card' + (p.isTrump ? ' trump-card' : '');
+    card.style.animationDelay = (ci * 0.05 + pi * 0.04) + 's';
+    const catShort = cat.label.split(' ')[0].toUpperCase();
+    card.innerHTML = `
+      <div class="start-card-name">${p.name}</div>
+      <div class="start-card-era">${p.shortEra}</div>
+      <div class="start-card-tag">${catShort}</div>
+    `;
+    card.addEventListener('click', () => selectPersonaMobile(p));
+    grid.appendChild(card);
+  });
+
+  section.appendChild(grid);
+  startCategories.appendChild(section);
+});
+
+/* ════════════════════════════════════════
+   BUILD DESKTOP SIDEBAR
+════════════════════════════════════════ */
+CATEGORIES.forEach(cat => {
+  const section = document.createElement('div');
+  section.className = 'desk-cat-section';
+  const label = document.createElement('div');
+  label.className = 'desk-cat-label';
+  label.textContent = cat.label;
+  section.appendChild(label);
+
+  cat.personas.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'desk-persona-card';
+    card.dataset.id = p.id;
+    card.innerHTML = `<div><div class="desk-card-name">${p.name}</div><div class="desk-card-era">${p.shortEra}</div></div>`;
+    card.addEventListener('click', () => selectPersonaDesktop(p));
+    section.appendChild(card);
+  });
+  desktopSidebarScroll.appendChild(section);
+});
+
+/* ════════════════════════════════════════
+   BUILD DRAWER (mobile persona switcher)
+════════════════════════════════════════ */
+CATEGORIES.forEach(cat => {
+  const label = document.createElement('div');
+  label.className = 'drawer-cat-label';
+  label.textContent = cat.label;
+  drawerScroll.appendChild(label);
+
+  cat.personas.forEach(p => {
+    const chip = document.createElement('div');
+    chip.className = 'drawer-chip';
+    chip.dataset.id = p.id;
+    chip.innerHTML = `<div><div class="drawer-chip-name">${p.name}</div><div class="drawer-chip-era">${p.shortEra}</div></div>`;
+    chip.addEventListener('click', () => {
+      closeDrawer();
+      setTimeout(() => selectPersonaMobile(p, true), 120);
+    });
+    drawerScroll.appendChild(chip);
+  });
+});
+
+/* ════════════════════════════════════════
+   MOBILE FLOW
+════════════════════════════════════════ */
+function selectPersonaMobile(p, fromDrawer = false) {
+  activePersona = p;
+  conversationHistory = [];
+
+  // update drawer active state
+  document.querySelectorAll('.drawer-chip').forEach(c => c.classList.toggle('active', c.dataset.id === p.id));
+
+  // switch to chat view
+  startScreen.classList.add('hidden');
+  chatView.classList.add('active');
+  menuBtn.classList.add('visible');
+
+  // update chat bar
+  document.getElementById('chatBarName').textContent = p.name;
+  document.getElementById('chatBarEra').textContent = p.shortEra;
+
+  renderChatWelcome(p);
+}
+
+/* ════════════════════════════════════════
+   DESKTOP FLOW
+════════════════════════════════════════ */
+function selectPersonaDesktop(p) {
+  activePersona = p;
+  conversationHistory = [];
+
+  document.querySelectorAll('.desk-persona-card').forEach(c => c.classList.toggle('active', c.dataset.id === p.id));
+
+  // detail pane
+  deskDetail.innerHTML = `
+    <div class="desk-det-emoji">${p.symbol}</div>
+    <div class="desk-det-name">${p.name}</div>
+    <div class="desk-det-title">${p.title}</div>
+    <div class="desk-det-bio">${p.bio}</div>
+    <div class="desk-corpus">${p.corpus.map(s=>`<div class="desk-corpus-tag">${s}</div>`).join('')}</div>
+  `;
+
+  document.getElementById('deskChatName').textContent = p.name;
+  document.getElementById('deskChatMeta').textContent = p.era.toUpperCase();
+
+  renderChatWelcome(p);
+}
+
+/* ════════════════════════════════════════
+   RENDER CHAT WELCOME
+════════════════════════════════════════ */
+function renderChatWelcome(p) {
+  chatMessages.innerHTML = `
+    <div class="chat-welcome" id="chatWelcome">
+      <div class="chat-welcome-emoji">${p.symbol}</div>
+      <h3>Now speaking with<br/><em>${p.name}</em></h3>
+      <p>Grounded in verified sources. Ask freely.</p>
+      <div class="chat-suggestions" id="chatSuggestions"></div>
+    </div>
+  `;
+  const sugEl = document.getElementById('chatSuggestions');
+  (p.suggestions || []).forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'chat-suggestion';
+    btn.textContent = `"${s}"`;
+    btn.addEventListener('click', () => sendMessage(s));
+    sugEl.appendChild(btn);
+  });
+
+  chatInput.disabled = false;
+  const firstName = p.name.replace(/"/g,'').split(' ')[0];
+  chatInput.placeholder = `Ask ${firstName} something…`;
+  sendBtn.disabled = false;
+  if (!isMobile()) chatInput.focus();
+}
+
+/* ════════════════════════════════════════
+   DRAWER CONTROLS
+════════════════════════════════════════ */
+menuBtn.addEventListener('click', openDrawer);
+drawerClose.addEventListener('click', closeDrawer);
+drawerOverlay.addEventListener('click', closeDrawer);
+
+function openDrawer() {
+  drawerOverlay.classList.add('open');
+  personaDrawer.classList.add('open');
+}
+function closeDrawer() {
+  drawerOverlay.classList.remove('open');
+  personaDrawer.classList.remove('open');
+}
+
+/* ════════════════════════════════════════
+   MESSAGING
+════════════════════════════════════════ */
+function getCitation(p) {
+  const sources = p.citations || [{tag:'Verified Corpus',conf:85}];
+  return sources[Math.floor(Math.random() * sources.length)];
+}
+
+async function sendMessage(text) {
+  if (!activePersona || isLoading || !text.trim()) return;
+  const userText = text.trim();
+  chatInput.value = ''; autoResize();
+  isLoading = true; sendBtn.disabled = true;
+  document.getElementById('chatWelcome')?.remove();
+  appendMessage('user', userText, null);
+
+  const thinkId = 'think-' + Date.now();
+  const thinkEl = document.createElement('div');
+  thinkEl.id = thinkId; thinkEl.className = 'message ai';
+  thinkEl.innerHTML = `<div class="msg-avatar">${activePersona.symbol}</div><div class="msg-content"><div class="thinking"><div class="thinking-text">Thinking…</div><div class="thinking-dots"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div></div></div>`;
+  chatMessages.appendChild(thinkEl); scrollToBottom();
+
+  conversationHistory.push({ role:'user', content:userText });
+
+  try {
+    const res = await fetch('/api/chat', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body:JSON.stringify({
+        model:'llama-3.3-70b-versatile',
+        max_tokens:1000,
+        messages:[{ role:'system', content:activePersona.system }, ...conversationHistory]
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
+    const aiText = data.choices?.[0]?.message?.content || '(empty response)';
+    conversationHistory.push({ role:'assistant', content:aiText });
+    document.getElementById(thinkId)?.remove();
+    appendMessage('ai', aiText, activePersona.isTrump ? null : getCitation(activePersona));
+  } catch (err) {
+    document.getElementById(thinkId)?.remove();
+    appendMessage('ai', 'Connection error: ' + err.message, null);
+  }
+
+  isLoading = false; sendBtn.disabled = false;
+  if (!isMobile()) chatInput.focus();
+}
+
+function appendMessage(role, text, citation) {
+  const el = document.createElement('div');
+  el.className = `message ${role==='user'?'user':'ai'}`;
+  const citHTML = (citation && role==='ai')
+    ? `<div class="msg-citation"><div class="citation-tag">${citation.tag}</div><div class="conf-row"><div class="conf-label">CONF</div><div class="conf-track"><div class="conf-fill" style="width:${citation.conf}%"></div></div><div class="conf-label">${citation.conf}%</div></div></div>`
+    : '';
+
+  // Listen button only on AI messages
+  const listenHTML = role === 'ai'
+    ? `<div class="listen-row"><button class="listen-btn" onclick="handleListen(this, ${JSON.stringify(text).replace(/`/g,"'")}, '${activePersona.id}')"><svg class="listen-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3.5v9l7-4.5-7-4.5z" fill="currentColor" stroke="none"/></svg>LISTEN</button></div>`
+    : '';
+
+  el.innerHTML = `<div class="msg-avatar">${role==='user'?'YOU':activePersona.symbol}</div><div class="msg-content"><div class="msg-sender">${role==='user'?'You':activePersona.name}</div><div class="msg-bubble">${escapeHtml(text)}</div>${citHTML}${listenHTML}</div>`;
+  chatMessages.appendChild(el); scrollToBottom();
+}
+
+/* ════════════════════════════════════════
+   TTS — LISTEN HANDLER
+════════════════════════════════════════ */
+let currentAudio = null;
+
+async function handleListen(btn, text, personaId) {
+  // If already playing this button, stop
+  if (btn.classList.contains('playing')) {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    btn.classList.remove('playing');
+    btn.innerHTML = `<svg class="listen-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3.5v9l7-4.5-7-4.5z" fill="currentColor" stroke="none"/></svg>LISTEN`;
+    return;
+  }
+
+  // Stop any other playing audio
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  document.querySelectorAll('.listen-btn.playing').forEach(b => {
+    b.classList.remove('playing');
+    b.innerHTML = `<svg class="listen-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3.5v9l7-4.5-7-4.5z" fill="currentColor" stroke="none"/></svg>LISTEN`;
+  });
+
+  // Strip HTML tags & truncate for TTS (max ~500 chars to keep it fast)
+  const cleanText = text.replace(/<br\/>/g, ' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').substring(0, 500);
+
+  btn.classList.add('loading');
+  btn.innerHTML = `<svg class="listen-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="5" stroke-dasharray="4 2"/></svg>LOADING…`;
+
+  try {
+    const res = await fetch(TTS_SERVER + '/synthesize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: cleanText, persona_id: personaId, max_tokens: 60 })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'TTS server error');
+    }
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    currentAudio = new Audio(url);
+
+    currentAudio.onended = () => {
+      btn.classList.remove('playing');
+      btn.innerHTML = `<svg class="listen-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3.5v9l7-4.5-7-4.5z" fill="currentColor" stroke="none"/></svg>LISTEN`;
+      URL.revokeObjectURL(url);
+      currentAudio = null;
+    };
+
+    currentAudio.onerror = () => {
+      btn.classList.remove('playing','loading');
+      btn.innerHTML = `<svg class="listen-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3.5v9l7-4.5-7-4.5z" fill="currentColor" stroke="none"/></svg>LISTEN`;
+    };
+
+    btn.classList.remove('loading');
+    btn.classList.add('playing');
+    btn.innerHTML = `<svg class="listen-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="3" height="10" rx="1" fill="currentColor" stroke="none"/><rect x="9" y="3" width="3" height="10" rx="1" fill="currentColor" stroke="none"/></svg>STOP`;
+    currentAudio.play();
+
+  } catch (err) {
+    btn.classList.remove('loading');
+    btn.innerHTML = `<svg class="listen-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 3.5v9l7-4.5-7-4.5z" fill="currentColor" stroke="none"/></svg>LISTEN`;
+    // Show inline error next to button
+    const row = btn.parentElement;
+    const existing = row.querySelector('.tts-error');
+    if (!existing) {
+      const errEl = document.createElement('span');
+      errEl.className = 'tts-error';
+      errEl.textContent = 'TTS server offline';
+      row.appendChild(errEl);
+      setTimeout(() => errEl.remove(), 4000);
+    }
+    console.warn('TTS error:', err.message);
+  }
+}
+
+function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br/>'); }
+function scrollToBottom() { setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 50); }
+function autoResize() { chatInput.style.height='auto'; chatInput.style.height=Math.min(chatInput.scrollHeight,120)+'px'; }
+
+chatInput.addEventListener('input', autoResize);
+chatInput.addEventListener('keydown', e => {
+  if (e.key==='Enter' && !e.shiftKey && !isMobile()) { e.preventDefault(); if (!isLoading) sendMessage(chatInput.value); }
+});
+sendBtn.addEventListener('click', () => { if (!isLoading) sendMessage(chatInput.value); });
+
+/* ── On desktop, show chat view immediately ── */
+if (!isMobile()) {
+  startScreen.classList.add('hidden');
+  chatView.classList.add('active');
+}
+window.addEventListener('resize', () => {
+  if (!isMobile()) {
+    startScreen.classList.add('hidden');
+    chatView.classList.add('active');
+    menuBtn.classList.remove('visible');
+  }
+});
+</script>
+</body>
+</html>

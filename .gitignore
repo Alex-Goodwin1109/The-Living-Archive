@@ -1,0 +1,26 @@
+# Secrets
+.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Voice data (large binary files)
+tts-server/voices/
+tts-server/voice_states/
+*.wav
+*.mp3
+*.ogg
+*.pt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel
+
+# Node
+node_modules/
