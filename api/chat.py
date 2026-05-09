@@ -9,17 +9,19 @@ class handler(BaseHTTPRequestHandler):
             payload = json.loads(body)
             groq_key = os.environ.get("GROQ_API_KEY", "")
             if not groq_key:
-                self._send(500, {"error": "GROQ_API_KEY not set in Vercel environment variables."})
+                self._send(500, {"error": "GROQ_API_KEY not configured."})
                 return
             req = urllib.request.Request(
                 "https://api.groq.com/openai/v1/chat/completions",
                 data=json.dumps(payload).encode(),
-                headers={"Content-Type": "application/json", "Authorization": f"Bearer {groq_key}"},
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {groq_key}"
+                },
                 method="POST",
             )
             with urllib.request.urlopen(req, timeout=30) as resp:
-                data = json.loads(resp.read())
-            self._send(200, data)
+                self._send(200, json.loads(resp.read()))
         except urllib.error.HTTPError as e:
             try: err = json.loads(e.read())
             except: err = {"error": str(e)}
