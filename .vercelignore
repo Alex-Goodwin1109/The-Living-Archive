@@ -1,0 +1,4 @@
+tts-server/
+venv/
+*.pyc
+__pycache__/
